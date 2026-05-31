@@ -3,16 +3,23 @@ const { parseFeedbackPayload, validateObjectId } = require("../utils/validation"
 
 function paginationFromQuery(query) {
   const page = Math.max(Number.parseInt(query.page, 10) || 1, 1);
-  const limit = Math.min(Math.max(Number.parseInt(query.limit, 10) || 10, 1), 10);
+  const limit = Math.min(Math.max(Number.parseInt(query.limit, 10) || 10, 1), 50);
   return { page, limit, skip: (page - 1) * limit };
+}
+
+function buildSearchFilter(q) {
+  if (!q || !q.trim()) return {};
+  const regex = new RegExp(q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+  return { $or: [{ name: regex }, { feedback: regex }, { route: regex }] };
 }
 
 async function listFeedback(req, res, next) {
   try {
     const { page, limit, skip } = paginationFromQuery(req.query);
+    const filter = buildSearchFilter(req.query.q);
     const [items, total] = await Promise.all([
-      Feedback.find().sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      Feedback.countDocuments(),
+      Feedback.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      Feedback.countDocuments(filter),
     ]);
 
     res.json({

@@ -148,12 +148,19 @@ function paginationFromQuery(query) {
   return { page, limit, skip: (page - 1) * limit };
 }
 
+function buildTicketSearchFilter(q) {
+  if (!q || !q.trim()) return {};
+  const regex = new RegExp(q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+  return { $or: [{ passengerName: regex }, { route: regex }] };
+}
+
 async function listTicketUploads(req, res, next) {
   try {
     const { page, limit, skip } = paginationFromQuery(req.query);
+    const filter = buildTicketSearchFilter(req.query.q);
     const [items, total] = await Promise.all([
-      TicketUpload.find().sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      TicketUpload.countDocuments(),
+      TicketUpload.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      TicketUpload.countDocuments(filter),
     ]);
 
     return res.json({
