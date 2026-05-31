@@ -23,6 +23,12 @@ const feedbackSchema = new mongoose.Schema(
       minlength: 5,
       maxlength: 1000,
     },
+    route: {
+      type: String,
+      trim: true,
+      maxlength: 120,
+      default: "",
+    },
     rating: {
       type: Number,
       required: true,

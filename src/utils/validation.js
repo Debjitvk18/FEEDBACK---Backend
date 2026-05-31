@@ -13,6 +13,7 @@ function validateObjectId(id) {
 function parseFeedbackPayload(body) {
   const name = cleanText(body.name);
   const feedback = cleanText(body.feedback);
+  const route = cleanText(body.route);
   const improvementArea = cleanText(body.improvementArea);
   const rating = Number(body.rating);
   const errors = [];
@@ -29,6 +30,10 @@ function parseFeedbackPayload(body) {
     errors.push("Rating must be a whole number from 1 to 5.");
   }
 
+  if (route.length > 120) {
+    errors.push("Route must be 120 characters or less.");
+  }
+
   if (improvementArea.length > 250) {
     errors.push("Improvement area must be 250 characters or less.");
   }
@@ -39,7 +44,7 @@ function parseFeedbackPayload(body) {
     throw error;
   }
 
-  return { name, feedback, rating, improvementArea };
+  return { name, feedback, route, rating, improvementArea };
 }
 
 module.exports = {

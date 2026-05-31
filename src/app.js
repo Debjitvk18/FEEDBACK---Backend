@@ -28,6 +28,7 @@ app.use(
   }),
 );
 app.use(express.json({ limit: "20kb" }));
+app.use(express.urlencoded({ extended: false, limit: "20kb" }));
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
